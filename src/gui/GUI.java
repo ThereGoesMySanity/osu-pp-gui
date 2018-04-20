@@ -12,6 +12,8 @@ import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetDropEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.List;
 
@@ -20,7 +22,9 @@ import javax.swing.JButton;
 import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JSplitPane;
@@ -191,8 +195,6 @@ public class GUI extends JFrame implements ActionListener {
 	}
 	
 	public Variable addVariable(String name, double min, double max, double def, int res, boolean diff) {
-		
-		
 		JPanel var_panel = new JPanel();
 		
 		GridBagLayout gbl_var_panel_ex = new GridBagLayout();
@@ -212,7 +214,7 @@ public class GUI extends JFrame implements ActionListener {
 		var_panel.add(label, gbc_label);
 		
 		CustomSlider slider = new CustomSlider(min, max, def, res);
-		
+		slider.addMouseListener(new MenuListener());
 		
 		GridBagConstraints gbc_slider = new GridBagConstraints();
 		gbc_slider.fill = GridBagConstraints.BOTH;
@@ -233,8 +235,8 @@ public class GUI extends JFrame implements ActionListener {
 		var_panel.add(textField, gbc_textField);
 		
 		Variable v = new Variable(slider, textField, min, max, def, diff);
+		slider.setVar(v);
 		textField.addActionListener(v);
-		slider.addChangeListener(v);
 		
 		if(diff) {
 			varInnerPanel2.add(var_panel);
@@ -254,6 +256,7 @@ public class GUI extends JFrame implements ActionListener {
 		 */
 		private static final long serialVersionUID = 1L;
 		private int m_res;
+		private Variable m_var;
 		public CustomSlider(double min, double max, double def, int res) {
 			super((int)(min*res), (int)(max*res), (int)(def*res));
 			m_res = res;
@@ -266,6 +269,13 @@ public class GUI extends JFrame implements ActionListener {
 		}
 		public int getRes()	 {
 			return m_res;
+		}
+		public Variable getVar() {
+			return m_var;
+		}
+		public void setVar(Variable v) {
+			m_var = v;
+			this.addChangeListener(v);
 		}
 	}
 	class CustomTextField extends JFormattedTextField {
@@ -290,6 +300,43 @@ public class GUI extends JFrame implements ActionListener {
 			m_controller.update(true);
 		} else {
 			m_controller.resetAll();
+		}
+	}
+	class CustomMenu extends JPopupMenu {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
+		public CustomMenu(Variable v) {
+			JMenuItem reset = new JMenuItem("Reset");
+			reset.addActionListener(new ResetListener(v));
+			add(reset);
+		}
+	}
+	class ResetListener implements ActionListener {
+		Variable m_var;
+		public ResetListener(Variable v) {
+			m_var = v;
+		}
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			m_var.reset();
+		}
+	}
+	class MenuListener extends MouseAdapter {
+		public void mousePressed(MouseEvent e) {
+			popup(e);
+		}
+		public void mouseReleased(MouseEvent e) {
+			popup(e);
+		}
+		private void popup(MouseEvent e) {
+			if(e.isPopupTrigger()) {
+				CustomSlider s = (CustomSlider)e.getSource();
+				CustomMenu m = new CustomMenu(s.getVar());
+				m.show(e.getComponent(), e.getX(), e.getY());
+			}
 		}
 	}
 }
