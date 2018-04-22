@@ -1,22 +1,11 @@
 package gui;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import com.github.francesco149.koohii.Koohii;
-import com.zerocooldown.libosu.util.Uleb128;
-
-import util.OsuAPI;
+import util.OsuUtils;
 
 public class Controller {
 	HashMap<String, Variable> variables;
@@ -47,18 +36,20 @@ public class Controller {
 		newVariable("stream spacing weight", 0, 2, 0.9, 100, true);
 		newVariable("spacing bonus 1", 0, 1, 0.4, 100, true);
 		newVariable("spacing bonus 2", 0, 1, 0.25, 100, true);
-		
+
 		File r = new File("replays");
 		if(r.exists() && r.isDirectory()) {
 			for(File f : r.listFiles()){
 				if(f.getName().startsWith("replay") && f.getName().endsWith(".osr")) {
-					newScore(f);
+					try {
+						newScore(OsuUtils.readReplay(f));
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
 			}
 		}
-	}
-	public void onVarUpdate(boolean diffCalc) {
-		update(diffCalc);
 	}
 
 	public double getVariable(String var, double def) {
@@ -77,95 +68,11 @@ public class Controller {
 		v.setController(this);
 	}
 
-	public void newScore(File replayFile) {
-		try {
-			Koohii.PPv2Parameters pp = new Koohii.PPv2Parameters();
-
-			BufferedInputStream br = new BufferedInputStream(new FileInputStream(replayFile));
-
-			br.skip(6);
-			long l = Uleb128.fromByteStream(br).asLong();
-			byte[] bh = new byte[(int) l];
-			br.read(bh);
-			String hash = new String(bh, "UTF-8");
-
-			br.skip(1);
-			bh = new byte[(int) Uleb128.fromByteStream(br).asLong()];
-			br.read(bh);
-			String player = new String(bh, "UTF-8");
-
-			File beatmap = OsuAPI.getBeatmap(hash);
-			Koohii.Map map = new Koohii.Parser().map(new BufferedReader(new InputStreamReader(new FileInputStream(beatmap))));
-			pp.beatmap = map;
-
-			br.skip(1);
-			bh = new byte[(int) Uleb128.fromByteStream(br).asLong()];
-			br.skip(bh.length);
-
-			ByteBuffer bb = ByteBuffer.allocate(4);
-			bb.order(ByteOrder.LITTLE_ENDIAN);
-			bh = new byte[2];
-
-			br.read(bh);
-			bb.put(bh);
-			bb.position(0);
-			pp.n300 = bb.getShort();
-
-			bb.clear();
-			br.read(bh);
-			bb.put(bh);
-			bb.position(0);
-			pp.n100 = bb.getShort();
-
-			bb.clear();
-			br.read(bh);
-			bb.put(bh);
-			bb.position(0);
-			pp.n50 = bb.getShort();
-
-			br.skip(4);
-
-			bb.clear();
-			br.read(bh);
-			bb.put(bh);
-			bb.position(0);
-			pp.nmiss = bb.getShort();
-
-			br.skip(4);
-
-			bb.clear();
-			br.read(bh);
-			bb.put(bh);
-			bb.position(0);
-			pp.combo = bb.getShort();
-
-			br.skip(1);
-
-			bb.clear();
-			bh = new byte[4];
-			br.read(bh);
-			bb.put(bh);
-			bb.position(0);
-			pp.mods = bb.getInt();
-
-			br.close();
-
-			Score s = new Score(pp, this);
-			s.setPPLabel(m_gui.addScore(player + " - " + map.artist + " - " + map.title));
-
-			scores.add(s);
-			s.updateDiffCalc();
-
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	public void newScore(Score s) {
+		s.setPPLabel(m_gui.addScore(s.getScoreName()));
+		s.setController(this);
+		s.updateDiffCalc();
+		scores.add(s);
 	}
 
 	public void update(boolean diffCalc) {

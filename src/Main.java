@@ -4,15 +4,15 @@ import java.util.Scanner;
 
 import gui.Controller;
 import gui.GUI;
-import util.OsuAPI;
+import util.OsuUtils;
 
 public class Main {
 	public static void main(String[] args) {
 		try {
 			Scanner s = new Scanner(new File("key.dat"));
-			OsuAPI.setKey(s.nextLine());
+			OsuUtils.setKey(s.nextLine());
 			s.close();
-			OsuAPI.setOsuDir("A:\\osu!\\Songs");
+			OsuUtils.setOsuDir("A:\\osu!\\Songs");
 			GUI g = new GUI();
 			Controller c = new Controller(g);
 			g.setController(c);

@@ -34,6 +34,9 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.EmptyBorder;
 import javax.swing.text.NumberFormatter;
+
+import util.OsuUtils;
+
 import javax.swing.JSeparator;
 
 public class GUI extends JFrame implements ActionListener {
@@ -86,7 +89,7 @@ public class GUI extends JFrame implements ActionListener {
 					List<File> droppedFiles = (List<File>)e.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
 					for(File f : droppedFiles) {
 						if(f.getName().endsWith(".osr")) {
-							m_controller.newScore(f);
+							m_controller.newScore(OsuUtils.readReplay(f));
 						}
 					}
 				} catch (Exception e1) {

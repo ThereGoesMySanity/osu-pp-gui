@@ -44,7 +44,7 @@ public class Variable implements ChangeListener, ActionListener {
 	public void stateChanged(ChangeEvent arg0) {
 		m_current = m_slider.get();
 		m_text.set(m_current);
-		m_controller.onVarUpdate(m_diffCalc);
+		m_controller.update(m_diffCalc);
 	}
 	//text
 	@Override
@@ -58,7 +58,7 @@ public class Variable implements ChangeListener, ActionListener {
 		} else {
 			m_slider.set(m_current);
 		}
-		m_controller.onVarUpdate(m_diffCalc);
+		m_controller.update(m_diffCalc);
 	}
 
 }

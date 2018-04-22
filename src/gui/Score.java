@@ -8,16 +8,20 @@ public class Score {
 	Koohii.DiffCalc m_diff;
 	Koohii.PPv2 m_pp;
 	Koohii.PPv2Parameters m_ppParams;
+	String m_playerName;
 	
 	Controller m_controller;
 	
 	JLabel m_ppLabel;
-	public Score(Koohii.PPv2Parameters pp, Controller c) {
+	public Score(Koohii.PPv2Parameters pp, String player) {
 		m_ppParams = pp;
-		m_controller = c;
+		m_playerName = player;
 	}
 	public void setPPLabel(JLabel pp) {
 		m_ppLabel = pp;
+	}
+	public void setController(Controller c) {
+		m_controller = c;
 	}
 	public double getPP() {
 		return m_pp.total;
@@ -31,5 +35,9 @@ public class Score {
 	public void updatePPCalc() {
 		m_pp = new Koohii.PPv2(m_ppParams, m_controller);
 		m_ppLabel.setText(String.format("%.2fpp", m_pp.total));
+	}
+	
+	public String getScoreName() {
+		return m_playerName +" - "+ m_ppParams.beatmap.artist + " - " + m_ppParams.beatmap.title;
 	}
 }
