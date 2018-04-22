@@ -4,6 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -49,11 +50,11 @@ public class OsuUtils {
 		if(version.isEmpty() || setID.isEmpty()) {
 			throw new IOException("Failed to connect to osu! api");
 		}
-		for(File f : Paths.get(osuDir, "Songs").toFile().listFiles()) {
+		for(File f : getOsuDir("Songs").listFiles()) {
 			if(f.isDirectory() && f.getName().startsWith(setID)) {
 				for(File f1 : f.listFiles()) {
 					if(f1.getName().endsWith(".osu") && f1.getName().contains("["+version+"]")) {
-						return new Koohii.Parser().map(new BufferedReader(new InputStreamReader(new FileInputStream(f1))));
+						return new Koohii.Parser().map(new BufferedReader(new FileReader(f1)));
 					}
 				}
 				return null;
@@ -165,5 +166,8 @@ public class OsuUtils {
 		byte[] bh = new byte[(int) l];
 		stream.read(bh);
 		return new String(bh, "UTF-8");
+	}
+	public static File getOsuDir(String subdir) {
+		return Paths.get(osuDir, subdir).toFile();
 	}
 }

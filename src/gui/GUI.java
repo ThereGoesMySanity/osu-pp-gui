@@ -26,6 +26,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JSlider;
 import javax.swing.JSplitPane;
 import javax.swing.ScrollPaneConstants;
@@ -36,8 +37,6 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.text.NumberFormatter;
 
 import util.OsuUtils;
-
-import javax.swing.JSeparator;
 
 public class GUI extends JFrame implements ActionListener {
 	/**
@@ -56,13 +55,18 @@ public class GUI extends JFrame implements ActionListener {
 	private JScrollPane mapScroll;
 	private JPanel mapOuterPanel;
 	private JPanel mapInnerPanel;
-	private JPanel panel_1;
-	private JButton button;
+	private JPanel varButtonPanel;
+	private JButton btnPPUpdate;
 	private JButton btnResetAll;
 	private JPanel varInnerPanel2;
 	private JLabel lblTheVariablesBelow;
 	private JLabel lblPpCalc;
 	private JSeparator separator;
+	private JPanel mapButtonPanel;
+	private JButton btnAddReplay;
+	private JButton btnCustomReplay;
+	private JButton btnImport;
+	private JButton btnClear;
 
 	public GUI() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -136,25 +140,25 @@ public class GUI extends JFrame implements ActionListener {
 		varOuterPanel.add(varInnerPanel2);
 		varInnerPanel2.setLayout(new BoxLayout(varInnerPanel2, BoxLayout.Y_AXIS));
 		
-		panel_1 = new JPanel();
-		varPanel.add(panel_1, BorderLayout.SOUTH);
-		panel_1.setLayout(new GridLayout(0, 2, 0, 0));
+		varButtonPanel = new JPanel();
+		varPanel.add(varButtonPanel, BorderLayout.SOUTH);
+		varButtonPanel.setLayout(new GridLayout(0, 2, 0, 0));
 		
-		button = new JButton("Update PP");
-		button.addActionListener(this);
-		panel_1.add(button);
+		btnPPUpdate = new JButton("Update PP");
+		btnPPUpdate.addActionListener(this);
+		varButtonPanel.add(btnPPUpdate);
 		
 		btnResetAll = new JButton("Reset All");
 		btnResetAll.addActionListener(this);
-		panel_1.add(btnResetAll);
+		varButtonPanel.add(btnResetAll);
 		
 		mapPanel = new JPanel();
 		splitPane.setLeftComponent(mapPanel);
-		mapPanel.setLayout(new BoxLayout(mapPanel, BoxLayout.X_AXIS));
+		mapPanel.setLayout(new BorderLayout(0, 0));
 		
 		mapScroll = new JScrollPane();
 		mapScroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-		mapPanel.add(mapScroll);
+		mapPanel.add(mapScroll, BorderLayout.CENTER);
 		
 		mapOuterPanel = new JPanel();
 		mapScroll.setViewportView(mapOuterPanel);
@@ -163,11 +167,30 @@ public class GUI extends JFrame implements ActionListener {
 		mapOuterPanel.add(mapInnerPanel);
 		mapInnerPanel.setLayout(new BoxLayout(mapInnerPanel, BoxLayout.Y_AXIS));
 		
+		mapButtonPanel = new JPanel();
+		mapPanel.add(mapButtonPanel, BorderLayout.SOUTH);
+		
+		btnAddReplay = new JButton("Add Replay");
+		mapButtonPanel.add(btnAddReplay);
+		btnAddReplay.addActionListener(this);
+		
+		btnCustomReplay = new JButton("Custom Replay");
+		mapButtonPanel.add(btnCustomReplay);
+		btnCustomReplay.addActionListener(this);
+		
+		btnImport = new JButton("Import User Top");
+		mapButtonPanel.add(btnImport);
+		btnImport.addActionListener(this);
+		
+		btnClear = new JButton("Clear");
+		mapButtonPanel.add(btnClear);
+		btnClear.addActionListener(this);
+		
 		
 		
 		
 	}
-	public JLabel addScore(String label) {
+	public JLabel addScore(Score s) {
 		JPanel panel = new JPanel();
 		
 		GridBagLayout gbl_panel = new GridBagLayout();
@@ -177,7 +200,7 @@ public class GUI extends JFrame implements ActionListener {
 		gbl_panel.rowWeights = new double[]{0.0, Double.MIN_VALUE};
 		panel.setLayout(gbl_panel);
 		
-		JLabel lblScoreName = new JLabel(label);
+		JLabel lblScoreName = new JLabel(s.getScoreName());
 		lblScoreName.setFont(new Font("Tahoma", Font.PLAIN, 11));
 		GridBagConstraints gbc_lblScoreName = new GridBagConstraints();
 		gbc_lblScoreName.insets = new Insets(0, 0, 0, 5);
@@ -194,7 +217,13 @@ public class GUI extends JFrame implements ActionListener {
 		
 		mapInnerPanel.add(panel);
 		
+		s.setJPanelVars(lblpp, panel);
+		
 		return lblpp;
+	}
+	
+	public void removeScore(Score s) {
+		mapInnerPanel.remove(s.getPanel());
 	}
 	
 	public Variable addVariable(String name, double min, double max, double def, int res, boolean diff) {
@@ -253,6 +282,28 @@ public class GUI extends JFrame implements ActionListener {
 		m_controller = c;
 	}
 	
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		if(e.getSource().equals(btnPPUpdate)) {
+			m_controller.update(true);
+		} else if(e.getSource().equals(btnResetAll)){
+			m_controller.resetAll();
+		} else if(e.getSource().equals(this.btnClear)){
+			m_controller.clearScores();
+		} else if(e.getSource().equals(this.btnImport)){
+			m_controller.importScores();
+		} else if(e.getSource().equals(this.btnAddReplay)){
+			m_controller.addReplays();
+		} else if(e.getSource().equals(this.btnCustomReplay)){
+			m_controller.customReplay();
+		}
+	}
+	/*
+	 * ----------------------------------------------------
+	 *                 Custom Swing classes
+	 * ----------------------------------------------------
+	 */
+	
 	class CustomSlider extends JSlider {
 		/**
 		 * 
@@ -297,14 +348,7 @@ public class GUI extends JFrame implements ActionListener {
 			setText(Double.toString(f));
 		}
 	}
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		if(e.getSource().equals(button)) {
-			m_controller.update(true);
-		} else {
-			m_controller.resetAll();
-		}
-	}
+	
 	class CustomMenu extends JPopupMenu {
 		/**
 		 * 

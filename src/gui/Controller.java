@@ -69,7 +69,7 @@ public class Controller {
 	}
 
 	public void newScore(Score s) {
-		s.setPPLabel(m_gui.addScore(s.getScoreName()));
+		m_gui.addScore(s);
 		s.setController(this);
 		s.updateDiffCalc();
 		scores.add(s);
@@ -86,5 +86,22 @@ public class Controller {
 			v.reset();
 		}
 		update(true);
+	}
+	public void clearScores() {
+		for(Score s : scores) {
+			m_gui.removeScore(s);
+		}
+		scores.clear();
+		m_gui.repaint();
+	}
+	public void importScores() {
+		
+	}
+	public void addReplays() {
+		
+	}
+	public void customReplay() {
+		CustomReplayDialog c = new CustomReplayDialog(this);
+		c.setVisible(true);
 	}
 }

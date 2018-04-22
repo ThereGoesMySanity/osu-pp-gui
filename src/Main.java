@@ -12,7 +12,7 @@ public class Main {
 			Scanner s = new Scanner(new File("key.dat"));
 			OsuUtils.setKey(s.nextLine());
 			s.close();
-			OsuUtils.setOsuDir("A:\\osu!\\Songs");
+			OsuUtils.setOsuDir("A:\\osu!");
 			GUI g = new GUI();
 			Controller c = new Controller(g);
 			g.setController(c);
